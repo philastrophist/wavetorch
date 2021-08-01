@@ -33,6 +33,7 @@ parser.add_argument('--name', type=str, default=time.strftime('%Y%m%d%H%M%S'),
                     help='Name to use when saving or loading the model file. If not specified when saving a time and date stamp is used')
 parser.add_argument('--savedir', type=str, default='./study/',
                     help='Directory in which the model file is saved. Defaults to ./study/')
+parser.add_argument('--continue_training', action='store_true', help='continue a previous model')
 
 if __name__ == '__main__':
     args = parser.parse_args()
