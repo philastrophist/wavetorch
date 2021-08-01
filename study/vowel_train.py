@@ -73,6 +73,7 @@ if __name__ == '__main__':
         x_test = torch.nn.utils.rnn.pad_sequence([X[i] for i in test_index], batch_first=True)
         y_train = torch.nn.utils.rnn.pad_sequence([Y[i] for i in train_index], batch_first=True)
         y_test = torch.nn.utils.rnn.pad_sequence([Y[i] for i in test_index], batch_first=True)
+        print(f"{len(x_train)} training, {len(x_test)} testing")
 
         x_train = x_train.to(args.dev)
         x_test  = x_test.to(args.dev)
