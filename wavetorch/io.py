@@ -10,6 +10,13 @@ from .rnn import WaveRNN
 from .source import WaveSource
 from .utils import set_dtype
 
+def get_fname(name, savedir):
+	str_filename = name + '.pt'
+	if not os.path.exists(savedir):
+		os.makedirs(savedir)
+	return savedir + str_filename
+
+
 def save_model(model,
 			   name,
 			   savedir='./study/',
@@ -19,10 +26,7 @@ def save_model(model,
 			   verbose=True):
 	"""Save the model state and history to a file
 	"""
-	str_filename = name + '.pt'
-	if not os.path.exists(savedir):
-		os.makedirs(savedir)
-	str_savepath = savedir + str_filename
+	str_savepath = get_fname(name, savedir)
 
 	if history_geom_state is None:
 		history_geom_state = [model.cell.geom.state_reconstruction_args()]

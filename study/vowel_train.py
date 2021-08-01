@@ -9,6 +9,9 @@ import argparse
 import time
 
 from yaml import load, dump
+
+from wavetorch.io import get_fname
+
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
 except ImportError:
@@ -85,65 +88,69 @@ if __name__ == '__main__':
 
         train_dl = DataLoader(train_ds, batch_size=cfg['training']['batch_size'], shuffle=True)
         test_dl  = DataLoader(test_ds, batch_size=cfg['training']['batch_size'])
+        if args.continue_training:
+            str_savepath = get_fname(args.name, args.savedir)
+            model, history, history_model_state, cfg = wavetorch.io.load_model(str_savepath)
+        else:
 
-        ### Define model
-        probes = setup_probe_coords(
-                            N_classes, cfg['geom']['px'], cfg['geom']['py'], cfg['geom']['pd'], 
-                            cfg['geom']['Nx'], cfg['geom']['Ny'], cfg['geom']['pml']['N']
-                            )
-        source = setup_src_coords(
-                            cfg['geom']['src_x'], cfg['geom']['src_y'], cfg['geom']['Nx'],
-                            cfg['geom']['Ny'], cfg['geom']['pml']['N']
-                            )
+            ### Define model
+            probes = setup_probe_coords(
+                N_classes, cfg['geom']['px'], cfg['geom']['py'], cfg['geom']['pd'],
+                cfg['geom']['Nx'], cfg['geom']['Ny'], cfg['geom']['pml']['N']
+            )
+            source = setup_src_coords(
+                cfg['geom']['src_x'], cfg['geom']['src_y'], cfg['geom']['Nx'],
+                cfg['geom']['Ny'], cfg['geom']['pml']['N']
+            )
 
-        design_region = torch.zeros(cfg['geom']['Nx'], cfg['geom']['Ny'], dtype=torch.uint8)
-        design_region[source[0].x.item()+5:probes[0].x.item()-5] = 1
+            design_region = torch.zeros(cfg['geom']['Nx'], cfg['geom']['Ny'], dtype=torch.uint8)
+            design_region[source[0].x.item()+5:probes[0].x.item()-5] = 1
 
-        geom  = wavetorch.WaveGeometryFreeForm((cfg['geom']['Nx'], cfg['geom']['Ny']), cfg['geom']['h'],             
-            c0=cfg['geom']['c0'], 
-            c1=cfg['geom']['c1'],
-            eta=cfg['geom']['binarization']['eta'],
-            beta=cfg['geom']['binarization']['beta'],
-            abs_sig=cfg['geom']['pml']['max'], 
-            abs_N=cfg['geom']['pml']['N'], 
-            abs_p=cfg['geom']['pml']['p'],
-            rho=cfg['geom']['init'],
-            blur_radius=cfg['geom']['blur_radius'],
-            blur_N=cfg['geom']['blur_N'],
-            design_region=design_region
-        )
+            geom  = wavetorch.WaveGeometryFreeForm((cfg['geom']['Nx'], cfg['geom']['Ny']), cfg['geom']['h'],
+                                                   c0=cfg['geom']['c0'],
+                                                   c1=cfg['geom']['c1'],
+                                                   eta=cfg['geom']['binarization']['eta'],
+                                                   beta=cfg['geom']['binarization']['beta'],
+                                                   abs_sig=cfg['geom']['pml']['max'],
+                                                   abs_N=cfg['geom']['pml']['N'],
+                                                   abs_p=cfg['geom']['pml']['p'],
+                                                   rho=cfg['geom']['init'],
+                                                   blur_radius=cfg['geom']['blur_radius'],
+                                                   blur_N=cfg['geom']['blur_N'],
+                                                   design_region=design_region
+                                                   )
 
-        cell  = wavetorch.WaveCell(cfg['geom']['dt'], geom,
-            satdamp_b0=cfg['geom']['nonlinearity']['b0'],
-            satdamp_uth=cfg['geom']['nonlinearity']['uth'],
-            c_nl=cfg['geom']['nonlinearity']['cnl']
-        )
+            cell  = wavetorch.WaveCell(cfg['geom']['dt'], geom,
+                                       satdamp_b0=cfg['geom']['nonlinearity']['b0'],
+                                       satdamp_uth=cfg['geom']['nonlinearity']['uth'],
+                                       c_nl=cfg['geom']['nonlinearity']['cnl']
+                                       )
 
-        model = wavetorch.WaveRNN(cell, source, probes)
+            model = wavetorch.WaveRNN(cell, source, probes)
         model.to(args.dev)
 
         ### Train
         optimizer = torch.optim.Adam(model.parameters(), lr=cfg['training']['lr'])
         criterion = torch.nn.CrossEntropyLoss()
-        
+
         model.train()
 
         history, history_model_state = wavetorch.train(
-                                            model,
-                                            optimizer,
-                                            criterion, 
-                                            train_dl, 
-                                            test_dl, 
-                                            cfg['training']['N_epochs'], 
-                                            cfg['training']['batch_size'], 
-                                            history=history,
-                                            history_model_state=history_model_state,
-                                            fold=num if cfg['training']['cross_validation'] else -1,
-                                            name=args.name,
-                                            savedir=args.savedir,
-                                            accuracy=wavetorch.utils.accuracy_onehot,
-                                            cfg=cfg)
-        
+            model,
+            optimizer,
+            criterion,
+            train_dl,
+            test_dl,
+            cfg['training']['N_epochs'],
+            cfg['training']['batch_size'],
+            history=history,
+            history_model_state=history_model_state,
+            fold=num if cfg['training']['cross_validation'] else -1,
+            name=args.name,
+            savedir=args.savedir,
+            accuracy=wavetorch.utils.accuracy_onehot,
+            cfg=cfg)
+
         wavetorch.io.save_model(model, args.name, args.savedir, history, history_model_state, cfg)
 
         if not cfg['training']['cross_validation']:
