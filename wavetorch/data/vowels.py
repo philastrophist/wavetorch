@@ -8,6 +8,14 @@ import numpy as np
 import torch
 from sklearn.model_selection import train_test_split
 
+# ignoring dipthongs
+VOWELS = {'ae': 'æ', 'ah': 'a', 'aw': 'ɐ', 'eh': 'ɛ', 'ei': 'e', 'er': 'ə', 'ih': 'ɪ', 'iy': 'i',
+		  'oa': 'o', 'oo': 'ʊ', 'uh': 'ʌ', 'uw': 'u'}
+UNROUNDED = 'æ a ɐ ɛ e ə ɪ i'.split()
+ROUNDED = 'o ʊ'
+BACK = 'ʌ u ʊ o'.split()
+CENTRAL = 'ə ɐ ə'.split()
+FRONT = 'æ a ɛ e ɪ i'.split()
 
 def normalize_vowel(wav_data):
 	"""Normalize the amplitude of a vowel waveform
@@ -45,24 +53,27 @@ def load_all_vowels(str_classes, gender='both', sr=None, normalize=True, dir='da
 	x_m = []
 	y_m = []
 	F_m = []
-	for i, str_class in enumerate(str_classes):
+	for i, str_class_group in enumerate(str_classes):
+		if isinstance(str_class_group, str):
+			str_class_group = [str_class_group]
 		y = np.eye(len(str_classes))[i]
 
-		# Women
-		files = os.path.join(dir, 'w*' + str_class + ext)
-		for file in sorted(glob.glob(files)):
-			x = load_vowel(file, sr=sr, normalize=normalize)
-			F_w.append(file)
-			x_w.append(x)
-			y_w.append(y)
+		for j, str_class in str_class_group:
+			# Women
+			files = os.path.join(dir, 'w*' + str_class + ext)
+			for file in sorted(glob.glob(files)):
+				x = load_vowel(file, sr=sr, normalize=normalize)
+				F_w.append(file)
+				x_w.append(x)
+				y_w.append(y)
 
-		# Men
-		files = os.path.join(dir, 'm*' + str_class + ext)
-		for file in sorted(glob.glob(files)):
-			x = load_vowel(file, sr=sr, normalize=normalize)
-			F_m.append(file)
-			x_m.append(x)
-			y_m.append(y)
+			# Men
+			files = os.path.join(dir, 'm*' + str_class + ext)
+			for file in sorted(glob.glob(files)):
+				x = load_vowel(file, sr=sr, normalize=normalize)
+				F_m.append(file)
+				x_m.append(x)
+				y_m.append(y)
 
 	if max_samples is not None:
 		# Limit the number of returned samples

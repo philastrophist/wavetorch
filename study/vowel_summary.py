@@ -118,13 +118,14 @@ if __name__ == '__main__':
 
     cm_train = history.groupby('epoch')['cm_train'].apply(np.mean).head(1).iloc[0]
     cm_test = history.groupby('epoch')['cm_test'].apply(np.mean).head(1).iloc[0]
-    wavetorch.plot.confusion_matrix(cm_train, title="Training dataset", normalize=True, ax=ax_cm_train0, labels=vowels)
-    wavetorch.plot.confusion_matrix(cm_test, title="Testing dataset", normalize=True, ax=ax_cm_test0, labels=vowels)
+    labels = [v if isinstance(v, str) else '|'.join(v) for v in vowels]
+    wavetorch.plot.confusion_matrix(cm_train, title="Training dataset", normalize=True, ax=ax_cm_train0, labels=labels)
+    wavetorch.plot.confusion_matrix(cm_test, title="Testing dataset", normalize=True, ax=ax_cm_test0, labels=labels)
 
     cm_train = history.groupby('epoch')['cm_train'].apply(np.mean).tail(1).iloc[0]
     cm_test = history.groupby('epoch')['cm_test'].apply(np.mean).tail(1).iloc[0]
-    wavetorch.plot.confusion_matrix(cm_train, title="Training dataset", normalize=True, ax=ax_cm_train1, labels=vowels)
-    wavetorch.plot.confusion_matrix(cm_test, title="Testing dataset", normalize=True, ax=ax_cm_test1, labels=vowels)
+    wavetorch.plot.confusion_matrix(cm_train, title="Training dataset", normalize=True, ax=ax_cm_train1, labels=labels)
+    wavetorch.plot.confusion_matrix(cm_test, title="Testing dataset", normalize=True, ax=ax_cm_test1, labels=labels)
 
     X, Y, F = wavetorch.data.load_all_vowels(vowels, gender='both', sr=sr, random_state=0)
 
