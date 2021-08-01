@@ -58,7 +58,7 @@ def load_all_vowels(str_classes, gender='both', sr=None, normalize=True, dir='da
 			str_class_group = [str_class_group]
 		y = np.eye(len(str_classes))[i]
 
-		for j, str_class in str_class_group:
+		for str_class in str_class_group:
 			# Women
 			files = os.path.join(dir, 'w*' + str_class + ext)
 			for file in sorted(glob.glob(files)):
