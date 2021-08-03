@@ -99,7 +99,7 @@ def train(model, optimizer, criterion, train_dl, test_dl,
 					yb_pred = normalize_power(model(xb).sum(dim=1))
 					list_yb_pred.append(yb_pred)
 					list_yb.append(yb)
-					loss_test_tmp.append(criterion(yb_pred, yb.argmax(dim=1)))
+					loss_test_tmp.append(criterion(yb_pred, yb.argmax(dim=1)).cpu().numpy())
 					if accuracy is not None:
 						acc_test_tmp.append(accuracy_onehot(yb_pred, yb.argmax(dim=1)))
 
