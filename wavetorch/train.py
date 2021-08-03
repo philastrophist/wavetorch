@@ -87,7 +87,7 @@ def train(model, optimizer, criterion, train_dl, test_dl,
 
 			y_pred = torch.cat(list_yb_pred, dim=0)
 			y_truth = torch.cat(list_yb, dim=0)
-			cm_train = confusion_matrix(y_truth.argmax(dim=1).numpy(), y_pred.argmax(dim=1).numpy())
+			cm_train = confusion_matrix(y_truth.argmax(dim=1).cpu().numpy(), y_pred.argmax(dim=1).cpu().numpy())
 
 			acc_test_tmp = []
 			loss_test_tmp = []
@@ -105,7 +105,7 @@ def train(model, optimizer, criterion, train_dl, test_dl,
 
 				y_pred = torch.cat(list_yb_pred, dim=0)
 				y_truth = torch.cat(list_yb, dim=0)
-				cm_test = confusion_matrix(y_truth.argmax(dim=1).numpy(), y_pred.argmax(dim=1).numpy())
+				cm_test = confusion_matrix(y_truth.argmax(dim=1).cpu().numpy(), y_pred.argmax(dim=1).cpu().numpy())
 
 		print(
 			'Epoch %2d/%2d --- Elapsed Time:  %4.2f min | Training Loss:  %.4e | Testing Loss:  %.4e | Training Accuracy:  %.4f | Testing Accuracy:  %.4f' %

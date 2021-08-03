@@ -16,7 +16,7 @@ class WaveSource(torch.nn.Module):
 		# Y[:, self.x, self.y] = Y[:, self.x, self.y] + dt**2 * X.expand_as(Y[:, self.x, self.y])
 
 		# Thanks to Erik Peterson for this fix
-		X_expanded = torch.zeros(Y.size()).detach()
+		X_expanded = torch.zeros(Y.size()).detach().to(Y.device)
 		X_expanded[:, self.x, self.y] = X
 
 		return Y + dt ** 2 * X_expanded
