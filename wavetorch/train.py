@@ -71,7 +71,7 @@ def train(model, optimizer, criterion, train_dl, test_dl,
 				loss = optimizer.step(closure)
 				model.cell.geom.constrain_to_design_region()
 
-			loss_iter.append(loss.item().cpu().numpy())
+			loss_iter.append(loss.item())
 
 		with torch.no_grad():
 			acc_train_tmp = []
