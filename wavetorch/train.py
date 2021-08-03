@@ -83,7 +83,7 @@ def train(model, optimizer, criterion, train_dl, test_dl,
 				list_yb_pred.append(yb_pred)
 				list_yb.append(yb)
 				if accuracy is not None:
-					acc_train_tmp.append(accuracy(yb_pred, yb.argmax(dim=1)).cpu().numpy())
+					acc_train_tmp.append(accuracy(yb_pred, yb.argmax(dim=1)))
 
 			y_pred = torch.cat(list_yb_pred, dim=0)
 			y_truth = torch.cat(list_yb, dim=0)
@@ -99,9 +99,9 @@ def train(model, optimizer, criterion, train_dl, test_dl,
 					yb_pred = normalize_power(model(xb).sum(dim=1))
 					list_yb_pred.append(yb_pred)
 					list_yb.append(yb)
-					loss_test_tmp.append(criterion(yb_pred, yb.argmax(dim=1)).cpu().numpy())
+					loss_test_tmp.append(criterion(yb_pred, yb.argmax(dim=1)))
 					if accuracy is not None:
-						acc_test_tmp.append(accuracy_onehot(yb_pred, yb.argmax(dim=1)).cpu().numpy())
+						acc_test_tmp.append(accuracy_onehot(yb_pred, yb.argmax(dim=1)))
 
 				y_pred = torch.cat(list_yb_pred, dim=0)
 				y_truth = torch.cat(list_yb, dim=0)
