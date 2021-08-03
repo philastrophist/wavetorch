@@ -71,7 +71,7 @@ def train(model, optimizer, criterion, train_dl, test_dl,
 				loss = optimizer.step(closure)
 				model.cell.geom.constrain_to_design_region()
 
-			loss_iter.append(loss.item())
+			loss_iter.append(loss.item().cpu().numpy())
 
 		with torch.no_grad():
 			acc_train_tmp = []
@@ -83,7 +83,7 @@ def train(model, optimizer, criterion, train_dl, test_dl,
 				list_yb_pred.append(yb_pred)
 				list_yb.append(yb)
 				if accuracy is not None:
-					acc_train_tmp.append(accuracy(yb_pred, yb.argmax(dim=1)))
+					acc_train_tmp.append(accuracy(yb_pred, yb.argmax(dim=1)).cpu().numpy())
 
 			y_pred = torch.cat(list_yb_pred, dim=0)
 			y_truth = torch.cat(list_yb, dim=0)
@@ -99,9 +99,9 @@ def train(model, optimizer, criterion, train_dl, test_dl,
 					yb_pred = normalize_power(model(xb).sum(dim=1))
 					list_yb_pred.append(yb_pred)
 					list_yb.append(yb)
-					loss_test_tmp.append(criterion(yb_pred, yb.argmax(dim=1)))
+					loss_test_tmp.append(criterion(yb_pred, yb.argmax(dim=1)).cpu().numpy())
 					if accuracy is not None:
-						acc_test_tmp.append(accuracy_onehot(yb_pred, yb.argmax(dim=1)))
+						acc_test_tmp.append(accuracy_onehot(yb_pred, yb.argmax(dim=1)).cpu().numpy())
 
 				y_pred = torch.cat(list_yb_pred, dim=0)
 				y_truth = torch.cat(list_yb, dim=0)
@@ -115,10 +115,10 @@ def train(model, optimizer, criterion, train_dl, test_dl,
 		history = history.append({'time': pd.to_datetime('now'),
 								  'epoch': epoch,
 								  'fold': fold,
-								  'loss_train': np.mean(loss_iter.cpu().numpy()),
-								  'loss_test': np.mean(loss_test_tmp.cpu().numpy()),
-								  'acc_train': np.mean(acc_train_tmp.cpu().numpy()),
-								  'acc_test': np.mean(acc_test_tmp.cpu().numpy()),
+								  'loss_train': np.mean(loss_iter),
+								  'loss_test': np.mean(loss_test_tmp),
+								  'acc_train': np.mean(acc_train_tmp),
+								  'acc_test': np.mean(acc_test_tmp),
 								  'cm_train': cm_train,
 								  'cm_test': cm_test},
 								 ignore_index=True)
